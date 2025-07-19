@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MedicalBot - Dialogflow Chatbot</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; background: #eef2f3; text-align: center; padding: 50px; }
+    df-messenger { --df-messenger-button-titlebar-color: #28a745; --df-messenger-chat-background-color: #ffffff; --df-messenger-font-color: #000000; }
+    .voice-btn, .lang-select {
+      position: fixed;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .voice-btn { bottom: 100px; }
+    .lang-select { bottom: 160px; }
+  </style>
+</head>
+<body>
+  <h2>💬 Welcome to MedicalBot Chat</h2>
+  <p>Ask me about your symptoms (in English or Tamil), and I’ll give you basic health advice.</p>
+
+  <!-- Dialogflow Messenger Integration -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+  <df-messenger
+    intent="WELCOME"
+    chat-title="MedicalBot"
+    agent-id="5e083895-e11b-46ff-87c5-ae5b7a72c890"
+    language-code="en">
+  </df-messenger>
+
+  <!-- 🔄 Language Toggle + 🎤 Voice Input Button & Script -->
+  <button class="lang-select" onclick="toggleLanguage()">🌐 Toggle: English / Tamil</button>
+  <button class="voice-btn" onclick="startVoiceInput()">🎤 Speak</button>
+
+  <script>
+    let currentLang = 'en-IN';
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = currentLang;
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    function startVoiceInput() {
+      recognition.lang = currentLang;
+      recognition.start();
+    }
+
+    function toggleLanguage() {
+      if (currentLang === 'en-IN') {
+        currentLang = 'ta-IN';
+        alert("🔁 Tamil mode enabled");
+      } else {
+        currentLang = 'en-IN';
+        alert("🔁 English mode enabled");
+      }
+    }
+
+    recognition.onresult = function(event) {
+      const input = event.results[0][0].transcript;
+      const messenger = document.querySelector('df-messenger');
+      const chat = messenger.shadowRoot.querySelector('df-messenger-chat');
+      const inputField = chat.shadowRoot.querySelector('input');
+      inputField.value = input;
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, which: 13 });
+      inputField.dispatchEvent(enterEvent);
+    };
+  </script>
+</body>
+</html>
